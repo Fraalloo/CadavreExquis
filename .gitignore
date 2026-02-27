@@ -1,0 +1,44 @@
+# --- General / OS ---
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+*.swp
+
+# --- Node.js / Frontend (Client) ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite specific
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Go / Backend (Server) ---
+# Binaries
+/bin/
+/obj/
+main
+main.exe
+
+# Go workspace file
+go.work
+
+# Environment variables
+.env
+*.env
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
