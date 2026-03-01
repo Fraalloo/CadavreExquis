@@ -1,0 +1,7 @@
+Comandi per Front-end:
+npm create vite@latest . -- --template react
+npm install
+
+Comandi per Back-end:
+go mod init cadavre
+go get github.com/gorilla/websocket
