@@ -8,7 +8,7 @@ const Toolbar = ({
     isEraser,
     setIsEraser,
     undo,
-    clearCanvas
+    clearPartialCanvas
 }) => {
     return (
         <div style={{display: "flex", gap: "15px", padding: "10px", backgroundColor: "#f0f0f0", borderRadius: "8px", marginBottom: "10px", alignItems: "center", flexWrap: "wrap"}}>
@@ -43,13 +43,13 @@ const Toolbar = ({
             {/* Strumenti */}
             <button 
                 onClick={() => setIsEraser(!isEraser)}
-                style={{backgroundColor: isEraser ? "#ffcccc" : "white", border: "1px solid #ccc", padding: "5px 10px", borderRadius: "4px", cursor: "pointer"}}
+                style={{padding: "5px 10px", backgroundColor: isEraser ? "#ffcccc" : "white", border: "1px solid #ccc", borderRadius: "4px", cursor: "pointer"}}
             >
                 {isEraser ? "✏️ Usa Pennello" : "🧽 Gomma"}
             </button>
 
-            <button onClick={undo} style={{padding: "5px 10px", cursor: "pointer"}}>↩️ Annulla</button>
-            <button onClick={clearCanvas} style={{padding: "5px 10px", cursor: "pointer", color: "red"}}>🗑️ Pulisci</button>
+            <button onClick={undo} style={{padding: "5px 10px", cursor: "pointer", backgroundColor: "white", borderRadius: "4px", border: "1px solid #ccc"}}>↩️ Annulla</button>
+            <button onClick={clearPartialCanvas} style={{padding: "5px 10px", cursor: "pointer", color: "red", backgroundColor: "white", borderRadius: "4px", border: "1px solid #ccc"}}>🗑️ Pulisci</button>
             
             {/* Separatore */}
             <div style={{flex: 1}}></div>

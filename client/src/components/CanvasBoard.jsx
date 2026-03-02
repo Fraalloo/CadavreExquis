@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect} from "react"
 import Toolbar from "./Toolbar.jsx"
 
-const CanvasBoard = () => {
+const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
     const canvasRef = useRef(null)
     const contextRef = useRef(null)
     
@@ -11,14 +11,21 @@ const CanvasBoard = () => {
     const [lineWidth, setLineWidth] = useState(5)
     const [isEraser, setIsEraser] = useState(false)
     
-    // Stato per l'Undo
+    // Stato per l"Undo
     const [history, setHistory] = useState([])
+
+    const CANVAS_WIDTH = 400
+    const CANVAS_HEIGHT = 600
+    const SECTION_HEIGHT = CANVAS_HEIGHT / 3
+
+    const minY = (round - 1) * SECTION_HEIGHT
+    const maxY = round * SECTION_HEIGHT
 
     // Inizializzazione del Canvas
     useEffect(() => {
         const canvas = canvasRef.current
-        canvas.width = 400
-        canvas.height = 600
+        canvas.width = CANVAS_WIDTH
+        canvas.height = CANVAS_HEIGHT
         
         const context = canvas.getContext("2d")
         context.lineCap = "round"
@@ -29,7 +36,7 @@ const CanvasBoard = () => {
         contextRef.current = context
         
         saveHistoryState(canvas)
-    }, [])
+    }, [round])
 
     // Aggiorna il contesto quando cambiano colore o spessore
     useEffect(() => {
@@ -39,9 +46,13 @@ const CanvasBoard = () => {
         }
     }, [color, lineWidth, isEraser])
 
+    const isWithinBounds = y => y >= minY && y <= maxY
+
     // Funzioni di disegno
     const startDrawing = ({nativeEvent}) => {
         const {offsetX, offsetY} = nativeEvent
+        if(!isWithinBounds(offsetY)) return
+
         contextRef.current.beginPath()
         contextRef.current.moveTo(offsetX, offsetY)
         setIsDrawing(true)
@@ -50,6 +61,11 @@ const CanvasBoard = () => {
     const draw = ({nativeEvent}) => {
         if(!isDrawing) return
         const {offsetX, offsetY} = nativeEvent
+        if(!isWithinBounds(offsetY)){
+            stopDrawing()
+            return
+        }
+
         contextRef.current.lineTo(offsetX, offsetY)
         contextRef.current.stroke()
     }
@@ -85,22 +101,27 @@ const CanvasBoard = () => {
         }
     }
 
-    const clearCanvas = () => {
+    const clearPartialCanvas = () => {
         const canvas = canvasRef.current
         const context = canvas.getContext("2d")
         context.fillStyle = "white"
-        context.fillRect(0, 0, canvas.width, canvas.height)
+        context.fillRect(0, minY, canvas.width, SECTION_HEIGHT)
         saveHistoryState(canvas)
     }
 
+    const handleDone = () => {
+        const canvas = canvasRef.current
+        const imageData = canvas.toDataURL("image/png")
+        sendDrawing(imageData)
+    }
+
     return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "20px" }}>
-        
+        <div style={{display: "flex", flexDirection: "column", alignItems: "center", marginTop: "20px"}}>
             <Toolbar 
                 color={color} setColor={setColor}
                 lineWidth={lineWidth} setLineWidth={setLineWidth}
                 isEraser={isEraser} setIsEraser={setIsEraser}
-                undo={undo} clearCanvas={clearCanvas}
+                undo={undo} clearPartialCanvas={clearPartialCanvas}
             />
 
             {/* Contenitore relativo per sovrapporre le linee */}
@@ -114,19 +135,56 @@ const CanvasBoard = () => {
                     style={{display: "block", touchAction: "none"}}
                 />
 
+                {/* Overlay superiore dei round precedenti */}
+                {round > 1 && (
+                    <div style={{position: "absolute", top: 0, left: 0, width: "100%", height: `${minY}px`, backgroundColor: "white", zIndex: 10, overflow: "hidden" }}>
+                        {previousImage && (
+                            <img
+                                src={previousImage}
+                                alt="Precedente"
+                                style={{position: "absolute", top: 0, left: 0, width: "100%", opacity: 0.4}}
+                            />
+                        )}
+
+                        {/* Il div dell'overlay */}
+                        <div style={{ 
+                            position: "absolute", top: 0, left: 0, width: "100%", height: "100%", 
+                            background: "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.95) calc(100% - 30px), transparent 100%)",
+                            display: "flex", alignItems: "center", justifyContent: "center", color: "white"
+                        }}>
+                            <p style={{margin: 0, opacity: 0.5, fontSize: "1.2rem"}}>Disegno precedente</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Overlay inferiore dei round futuri */}
+                {round < 3 && (
+                    <div style={{position: "absolute", top: `${maxY}px`, left: 0, width: "100%", height: `${CANVAS_HEIGHT - maxY}px`, backgroundColor: "rgba(0,0,0,0.85)", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "1.2rem"}}>
+                        <p style={{margin: 0, opacity: 0.5}}>Area bloccata</p>
+                    </div>
+                )}
+
                 {/* Overlay delle linee di mezzeria*/}
                 <div style={{ 
                     position: "absolute", top: 0, left: 0, width: "100%", height: "100%", 
                     pointerEvents: "none", display: "flex", flexDirection: "column" 
                 }}>
-                {/* Sezione Testa */}
-                <div style={{flex: 1, borderBottom: "2px dashed rgba(0,0,0,0.3)"}}></div>
-                {/* Sezione Busto */}
-                <div style={{flex: 1, borderBottom: "2px dashed rgba(0,0,0,0.3)"}}></div>
-                {/* Sezione Gambe */}
-                <div style={{flex: 1}}></div>
+                    {/* Sezione Testa */}
+                    <div style={{flex: 1, borderBottom: "2px dashed rgba(0,0,0,0.3)"}}></div>
+                    {/* Sezione Busto */}
+                    <div style={{flex: 1, borderBottom: "2px dashed rgba(0,0,0,0.3)"}}></div>
+                    {/* Sezione Gambe */}
+                    <div style={{flex: 1}}></div>
                 </div>
             </div>
+
+            <button 
+                onClick={handleDone}
+                style={{marginTop: "20px", padding: "15px 40px", fontSize: "1.2rem", fontWeight: "bold", backgroundColor: "#27ae60", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}}
+            >
+                🎨 FATTO! Invia disegno
+            </button>
+
             <p style={{marginTop: "10px", color: "#666", fontSize: "14px"}}>
                 Le linee tratteggiate servono da guida e non verranno salvate nel PNG.
             </p>

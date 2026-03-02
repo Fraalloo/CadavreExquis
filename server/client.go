@@ -66,12 +66,20 @@ func (c *Client) readMessages() {
 			break
 		}
 
-		var msg WSMessage
-		if err := json.Unmarshal(messageBytes, &msg); err == nil {
-			if msg.Type == "READY" {
+		var incoming map[string]any
+		if err := json.Unmarshal(messageBytes, &incoming); err == nil {
+			msgType, _ := incoming["type"].(string)
+			switch msgType {
+			case "READY":
 				c.Room.SetPlayerReady(c)
+			case "SUBMIT_DRAWING":
+				roundFloat, _ := incoming["round"].(float64)
+				imageStr, _ := incoming["image"].(string)
+				c.Room.SubmitDrawing(c, int(roundFloat), imageStr)
 			}
-			log.Printf("Messaggio ricevuto in stanza %s: %s\n", c.Room.Code, string(msg.State))
+			log.Printf("Messaggio [%s] elaborato nella stanza %s\n", msgType, c.Room.Code)
+		} else {
+			log.Printf("Errore nel parsing del JSON in stanza %s: %v\n", c.Room.Code, err)
 		}
 	}
 }
