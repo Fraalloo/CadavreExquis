@@ -31,6 +31,9 @@ func ServeWS(manager *RoomManager, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	clientIP := r.RemoteAddr
+	log.Printf("Tentativo di connessione alla stanza %s da IP: %s\n", roomCode, clientIP)
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Errore Upgrade WebSocket:", err)
@@ -63,6 +66,8 @@ func (c *Client) readMessages() {
 	for {
 		_, messageBytes, err := c.Conn.ReadMessage()
 		if err != nil {
+			// AGGIUNGI QUESTA RIGA: Stamperà il codice di errore esatto del distacco!
+			log.Printf("🔴 Disconnessione in stanza %s. Motivo: %v\n", c.Room.Code, err)
 			break
 		}
 

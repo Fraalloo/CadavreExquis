@@ -15,7 +15,12 @@ const App = () => {
 	const wsRef = useRef(null)
 
     const joinRoom = (code) => {
-		const ws = new WebSocket(`ws://localhost:1775/ws?room=${code}`) // Hardcoded temporaneamente
+		if(wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)){
+			console.log("Connessione già in corso, blocco il tentativo duplicato!");
+			return;
+		}
+
+		const ws = new WebSocket(`ws://${window.location.hostname}:1775/ws?room=${code}`) // Hardcoded temporaneamente
 
 		ws.onopen = () => {
 			console.log(`Connessione alla stanza: ${code}`)
@@ -67,10 +72,11 @@ const App = () => {
 			setGameState("HOME")
 			setPlayerCount(0)
 			setIsReady(false)
+			wsRef.current = null
 		}
 		
 		ws.onerror = (error) => {
-			console.error("Errore WebSocket:", error)
+			alert("Errore WebSocket:", error)
 		}
 
 		wsRef.current = ws

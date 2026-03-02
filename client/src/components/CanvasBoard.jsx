@@ -48,9 +48,31 @@ const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
 
     const isWithinBounds = y => y >= minY && y <= maxY
 
+    const getCoordinates = (e) => {
+        if(e.touches && e.touches.length > 0){
+            const touch = e.touches[0]
+            const canvas = canvasRef.current
+            const rect = canvas.getBoundingClientRect()
+            
+            // Scala per rimpicciolimento dei dispositivi mobile 
+            const scaleX = canvas.width / rect.width
+            const scaleY = canvas.height / rect.height
+
+            return {
+                offsetX: (touch.clientX - rect.left) * scaleX,
+                offsetY: (touch.clientY - rect.top) * scaleY
+            }
+        }else{
+            return {
+                offsetX: e.nativeEvent.offsetX,
+                offsetY: e.nativeEvent.offsetY
+            }
+        }
+    }
+
     // Funzioni di disegno
-    const startDrawing = ({nativeEvent}) => {
-        const {offsetX, offsetY} = nativeEvent
+    const startDrawing = (e) => {
+        const {offsetX, offsetY} = getCoordinates(e)
         if(!isWithinBounds(offsetY)) return
 
         contextRef.current.beginPath()
@@ -58,9 +80,9 @@ const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
         setIsDrawing(true)
     }
 
-    const draw = ({nativeEvent}) => {
+    const draw = (e) => {
         if(!isDrawing) return
-        const {offsetX, offsetY} = nativeEvent
+        const {offsetX, offsetY} = getCoordinates(e)
         if(!isWithinBounds(offsetY)){
             stopDrawing()
             return
@@ -132,6 +154,10 @@ const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
                     onMouseMove={draw}
                     onMouseUp={stopDrawing}
                     onMouseLeave={stopDrawing}
+                    onTouchStart={startDrawing}
+                    onTouchMove={draw}
+                    onTouchEnd={stopDrawing}
+                    onTouchCancel={stopDrawing}
                     style={{display: "block", touchAction: "none"}}
                 />
 
