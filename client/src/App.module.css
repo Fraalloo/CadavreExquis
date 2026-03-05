@@ -1,0 +1,111 @@
+/* Contenitore Principale */
+.appContainer {
+    min-height: 100vh;
+    background-color: #fafafa;
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+.roundContainer {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.roundHeader {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: white;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.roundTitle {
+    margin: 0;
+}
+
+.leaveButton {
+    padding: 8px 15px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Stato di Attesa Disegno */
+.submittedContainer {
+    text-align: center;
+    padding: 50px;
+    background-color: white;
+    border-radius: 8px;
+}
+
+/* Schermata Finale (Game Over) */
+.gameOverContainer {
+    text-align: center;
+}
+
+.gameOverTitle {
+    color: #2c3e50;
+    font-size: 2.5rem;
+}
+
+.playAgainButton {
+    margin-bottom: 30px;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Galleria dei Capolavori */
+.papersList {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.paperItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.paperTitle {
+    color: #7f8c8d;
+}
+
+.canvasContainer {
+    position: relative;
+    width: 600px;
+    height: 800px;
+    background-color: white;
+    border: 4px solid #2c3e50;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.final_img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: multiply;
+}
+
+.downloadButton {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}

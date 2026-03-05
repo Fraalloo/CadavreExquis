@@ -2,6 +2,10 @@ import React, {useState, useRef} from "react"
 import Home from "./components/Home.jsx"
 import Lobby from "./components/Lobby.jsx"
 import CanvasBoard from "./components/CanvasBoard.jsx"
+import {CANVAS_WIDTH, CANVAS_HEIGHT} from "./utils/config.js"
+import {jsonready, jsonsubmit} from "./utils/websocket.js"
+import {papers2png} from "./utils/media.js"
+import styles from "./App.module.css"
 
 const App = () => {
     const [roomCode, setRoomCode] = useState(null)
@@ -16,11 +20,13 @@ const App = () => {
 
     const joinRoom = (code) => {
 		if(wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)){
-			console.log("Connessione già in corso, blocco il tentativo duplicato!");
-			return;
+			console.log("Connessione già in corso, blocco il tentativo duplicato!")
+			return
 		}
 
-		const ws = new WebSocket(`ws://${window.location.hostname}:1775/ws?room=${code}`) // Hardcoded temporaneamente
+		const address = import.meta.env.VITE_SERVER_ADDRESS || window.location.hostname
+    	const port = import.meta.env.VITE_SERVER_PORT || "1773"
+		const ws = new WebSocket(`ws://${address}:${port}/ws?room=${code}`)
 
 		ws.onopen = () => {
 			console.log(`Connessione alla stanza: ${code}`)
@@ -63,7 +69,7 @@ const App = () => {
 					break
 				
 				default:
-            		console.log("Messaggio sconosciuto:", data);
+            		console.log("Messaggio sconosciuto:", data)
 			}
 		}
 		
@@ -82,23 +88,11 @@ const App = () => {
 		wsRef.current = ws
     }
 
-	const sendReady = () => {
-		if(wsRef.current){
-			wsRef.current.send(JSON.stringify({type: "READY"}))
-			setIsReady(true)
-		}
-	}
+	const sendReady = () => {setIsReady(jsonready(wsRef))}
 
-	const sendDrawing = (imageData) => {
-		if(wsRef.current){
-			wsRef.current.send(JSON.stringify({ 
-				type: "SUBMIT_DRAWING", 
-				image: imageData,
-				round: currentRound
-			}))
-			setHasSubmitted(true)
-		}
-	}
+	const sendDrawing = imageData => {setHasSubmitted(jsonsubmit(wsRef, imageData, currentRound))}
+
+	const downloadPNG = async (paper, index) => {papers2png(paper, index, CANVAS_HEIGHT, CANVAS_WIDTH)}
 
     const leaveRoom = () => {
     	if(wsRef.current){
@@ -109,7 +103,7 @@ const App = () => {
     }
 
     return (
-		<div style={{minHeight: "100vh", backgroundColor: "#fafafa", padding: "20px", fontFamily: "sans-serif"}}>
+		<div className={styles.appContainer}>
 			{gameState === "HOME" && <Home joinRoom={joinRoom}/>}
 
 			{(gameState === "WAITING" || gameState === "FULL") && (
@@ -123,16 +117,16 @@ const App = () => {
 			)}
 
 			{gameState.startsWith("ROUND_") && (
-				<div style={{maxWidth: "800px", margin: "0 auto"}}>
-					<div style={{display: "flex", justifyContent: "space-between", padding: "10px 20px", backgroundColor: "white", borderRadius: "8px", marginBottom: "20px"}}>
-						<h2 style={{margin: 0}}>Round {currentRound}: {currentRound === 1 ? "La Testa" : currentRound === 2 ? "Il Busto" : "Le Gambe"}</h2>
-						<button onClick={leaveRoom} style={{padding: "8px 15px", backgroundColor: "#e74c3c", color: "white", border: "none", borderRadius: "4px", cursor: "pointer"}}>
+				<div className={styles.roundContainer}>
+					<div className={styles.roundHeader}>
+						<h2 className={styles.roundTitle}>Round {currentRound}: {currentRound === 1 ? "La Testa" : currentRound === 2 ? "Il Busto" : "Le Gambe"}</h2>
+						<button onClick={leaveRoom} className={styles.leaveButton}>
 							Abbandona
 						</button>
 					</div>
 
 					{hasSubmitted ? (
-						<div style={{textAlign: "center", padding: "50px", backgroundColor: "white", borderRadius: "8px"}}>
+						<div className={styles.submittedContainer}>
 							<h3>Disegno inviato! 🎨</h3>
 							<p>In attesa che gli altri giocatori finiscano...</p>
 						</div>
@@ -147,36 +141,33 @@ const App = () => {
 			)}
 
 			{gameState === "GAME_OVER" && (
-				<div style={{textAlign: "center"}}>
-					<h1 style={{color: "#2c3e50", fontSize: "2.5rem"}}>"Capolavori" Completati!</h1>
+				<div className={styles.gameOverContainer}>
+					<h1 className={styles.gameOverTitle}>"Capolavori" Completati!</h1>
 					<button
 						onClick={() => window.location.reload()}
-						style={{marginBottom: "30px", padding: "10px 20px", backgroundColor: "#3498db", color: "white", border: "none", borderRadius: "4px", cursor: "pointer"}}
+						className={styles.playAgainButton}
 					>
 						Gioca di nuovo
 					</button>
 					
-					<div style={{display: "flex", justifyContent: "center", gap: "30px", flexWrap: "wrap"}}>
+					<div className={styles.papersList}>
 						{finalPapers.map((paper, index) => (
-							<div key={index} style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-								<h3 style={{color: "#7f8c8d"}}>Creatura {index + 1}</h3>
+							<div key={index} className={styles.paperItem}>
+								<h3 className={styles.paperTitle}>Capolavoro {index + 1}</h3>
 								
-								{/* Contenitore dei capolavori */}
-								<div style={{ 
-									position: "relative", 
-									width: "300px", 
-									height: "450px",
-									backgroundColor: "white", 
-									border: "4px solid #2c3e50", 
-									borderRadius: "8px", 
-									boxShadow: "0 10px 20px rgba(0,0,0,0.1)" 
-								}}>
-
 								{/* Sovrapposizione delle 3 immagini*/}
-								<img src={paper[0]} style={{position: "absolute", top: 0, left: 0, width: "100%", height: "100%", mixBlendMode: "multiply"}} alt="Testa"/>
-								<img src={paper[1]} style={{position: "absolute", top: 0, left: 0, width: "100%", height: "100%", mixBlendMode: "multiply"}} alt="Busto"/>
-								<img src={paper[2]} style={{position: "absolute", top: 0, left: 0, width: "100%", height: "100%", mixBlendMode: "multiply"}} alt="Gambe"/>
+								<div className={styles.canvasContainer}>
+									<img src={paper[0]} className={styles.final_img} alt="Testa"/>
+									<img src={paper[1]} className={styles.final_img} alt="Busto"/>
+									<img src={paper[2]} className={styles.final_img} alt="Gambe"/>
 								</div>
+
+								<button 
+                                    onClick={() => downloadPNG(paper, index)}
+                                    className={styles.downloadButton}
+                                >
+                                    🧨 Scarica Capolavoro
+                                </button>
 							</div>
 						))}
 					</div>

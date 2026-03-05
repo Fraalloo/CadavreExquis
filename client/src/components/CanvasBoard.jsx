@@ -1,5 +1,6 @@
 import React, {useRef, useState, useEffect} from "react"
 import Toolbar from "./Toolbar.jsx"
+import {CANVAS_WIDTH, CANVAS_HEIGHT, SECTION_HEIGHT} from "../utils/config.js"
 
 const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
     const canvasRef = useRef(null)
@@ -13,10 +14,6 @@ const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
     
     // Stato per l"Undo
     const [history, setHistory] = useState([])
-
-    const CANVAS_WIDTH = 400
-    const CANVAS_HEIGHT = 600
-    const SECTION_HEIGHT = CANVAS_HEIGHT / 3
 
     const minY = (round - 1) * SECTION_HEIGHT
     const maxY = round * SECTION_HEIGHT
@@ -139,12 +136,14 @@ const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
 
     return (
         <div style={{display: "flex", flexDirection: "column", alignItems: "center", marginTop: "20px"}}>
-            <Toolbar 
-                color={color} setColor={setColor}
-                lineWidth={lineWidth} setLineWidth={setLineWidth}
-                isEraser={isEraser} setIsEraser={setIsEraser}
-                undo={undo} clearPartialCanvas={clearPartialCanvas}
-            />
+            <div style={{position: "sticky", top: 0, zIndex: 50, backgroundColor: "transparent"}}>
+                <Toolbar 
+                    color={color} setColor={setColor}
+                    lineWidth={lineWidth} setLineWidth={setLineWidth}
+                    isEraser={isEraser} setIsEraser={setIsEraser}
+                    undo={undo} clearPartialCanvas={clearPartialCanvas}
+                />
+            </div>
 
             {/* Contenitore relativo per sovrapporre le linee */}
             <div style={{position: "relative", border: "2px solid #333", borderRadius: "8px", overflow: "hidden", boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}}>
@@ -204,16 +203,18 @@ const CanvasBoard = ({round = 1, sendDrawing, previousImage}) => {
                 </div>
             </div>
 
-            <button 
-                onClick={handleDone}
-                style={{marginTop: "20px", padding: "15px 40px", fontSize: "1.2rem", fontWeight: "bold", backgroundColor: "#27ae60", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}}
-            >
-                🎨 FATTO! Invia disegno
-            </button>
+            <div style={{display: "flex", flexDirection: "column", padding: "1%", position: "sticky", bottom: 0, zIndex: 50, backgroundColor: "#fafafa", borderTopLeftRadius: 10, borderTopRightRadius: 10}}>
+                <button 
+                    onClick={handleDone}
+                    style={{marginTop: "20px", padding: "15px 40px", fontSize: "1.2rem", fontWeight: "bold", backgroundColor: "#27ae60", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}}
+                >
+                    🎨 FATTO! Invia disegno
+                </button>
 
-            <p style={{marginTop: "10px", color: "#666", fontSize: "14px"}}>
-                Le linee tratteggiate servono da guida e non verranno salvate nel PNG.
-            </p>
+                <p style={{marginTop: "10px", color: "#666", fontSize: "14px"}}>
+                    Le linee tratteggiate servono da guida e non verranno salvate nel PNG.
+                </p>
+            </div>
         </div>
     )
 }

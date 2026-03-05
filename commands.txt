@@ -5,3 +5,4 @@ npm install
 Comandi per Back-end:
 go mod init cadavre
 go get github.com/gorilla/websocket
+go get github.com/joho/godotenv
