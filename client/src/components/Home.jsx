@@ -1,4 +1,5 @@
 import React, {useState} from "react"
+import Footer from "./Footer.jsx"
 
 const Home = ({joinRoom}) => {
     const [roomInput, setRoomInput] = useState("")
@@ -18,7 +19,7 @@ const Home = ({joinRoom}) => {
 
     return (
         <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "80vh", fontFamily: "sans-serif"}}>
-            <h1 style={{fontSize: "3rem", marginBottom: "10px", color: "#2c3e50"}}>Cadavre Exquis</h1>
+            <h1 style={{fontSize: "2.7rem", marginBottom: "10px", color: "#2c3e50"}}>Cadavre Exquis</h1>
             <p style={{fontSize: "1.2rem", color: "#7f8c8d", marginBottom: "40px"}}>Il gioco di disegno cooperativo</p>
 
             <div style={{display: "flex", flexDirection: "column", gap: "20px", width: "300px"}}>
@@ -51,6 +52,7 @@ const Home = ({joinRoom}) => {
                     </button>
                 </form>
             </div>
+            <Footer/>
         </div>
     )
 }

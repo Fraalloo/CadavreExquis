@@ -1,8 +1,8 @@
-import React, {useState, useRef} from "react"
+import React, {useState, useRef, useEffect} from "react"
 import Home from "./components/Home.jsx"
 import Lobby from "./components/Lobby.jsx"
 import CanvasBoard from "./components/CanvasBoard.jsx"
-import {CANVAS_WIDTH, CANVAS_HEIGHT} from "./utils/config.js"
+import {CANVAS_WIDTH, CANVAS_HEIGHT, TITOLI} from "./utils/config.js"
 import {jsonready, jsonsubmit} from "./utils/websocket.js"
 import {papers2png} from "./utils/media.js"
 import styles from "./App.module.css"
@@ -17,6 +17,12 @@ const App = () => {
 	const [previousImage, setPreviousImage] = useState(null)
   	const [finalPapers, setFinalPapers] = useState([])
 	const wsRef = useRef(null)
+
+	useEffect(() => {
+        document.title = Object.hasOwn(TITOLI, gameState) 
+            ? TITOLI[gameState] 
+            : TITOLI["DEFAULT"]
+    }, [gameState])
 
     const joinRoom = (code) => {
 		if(wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)){
@@ -107,7 +113,7 @@ const App = () => {
 			{gameState === "HOME" && <Home joinRoom={joinRoom}/>}
 
 			{(gameState === "WAITING" || gameState === "FULL") && (
-				<Lobby 
+				<Lobby
 					roomCode={roomCode}
 					playerCount={playerCount}
 					isReady={isReady}

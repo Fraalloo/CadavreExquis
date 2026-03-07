@@ -1,0 +1,15 @@
+{
+    "name": "Cadavre Exquis",
+    "short_name": "Cadavre",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fafafa",
+    "theme_color": "#3498db",
+    "icons": [
+        {
+            "src": "/touch-icon.png",
+            "sizes": "600x600",
+            "type": "image/png"
+        }
+    ]
+}
